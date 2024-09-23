@@ -64,11 +64,23 @@ module AutoIncrement
     def increment
       max = maximum
 
-      max.blank? ? @initial : max.next
+      max.blank? ? initial_value : max.next
     end
 
     def string?
-      @initial.instance_of?(String)
+      initial_value.instance_of?(String)
+    end
+
+    def initial_value
+      @initial_value ||= begin
+        if @initial.respond_to?(:call)
+          @record.instance_exec(&@initial)
+        elsif @initial.is_a?(Symbol)
+          @record.send(@initial)
+        else
+          @initial
+        end
+      end
     end
   end
 end
